@@ -1,17 +1,17 @@
-int throttlePin = 14;
-int pwmOutPin = 5;
+int throttlePin = 6;
+int pwmOutPin = 14;
 
-void setup()  { 
+void setup()  // setup loop
+{
+  pinMode(pwmOutPin, OUTPUT); // declares pin 12 as output
+  pinMode(throttlePin, INPUT);  // declares pin A0 as input
   Serial.begin(9600);
-} 
+}
 
-void loop()  { 
-  int potValue= analogRead(throttlePin);
-  int pwmOutput = map(potValue, 0, 1023, 0 , 255);
-  analogWrite(pwmOutPin, pwmOutput);
+void loop() {
+  int pwmOut = map(analogRead(throttlePin), 0, 1023, 0, 255);
+  analogWrite(pwmOutPin, pwmOut);
+  
   Serial.print("Pot Value ");
-  Serial.print(potValue);
-  Serial.print(" | PWM Output ");
-  Serial.println(pwmOutput);
-  delay(100);
+  Serial.println(analogRead(throttlePin));
 }
