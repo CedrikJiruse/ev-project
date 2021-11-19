@@ -1,30 +1,43 @@
 #include <Arduino.h>
-#include <analogWrite.h>
 
 int throttlePin = 4;
 int motorPin = 16;
+int speedPin = 15;
+
+volatile int pwm_value = 0;
+volatile int prev_time = 0;
 
 // setting PWM properties
-const int freq = 200000;
-const int ledChannel = 0;
-const int resolution = 12;
+const int freq = 200000, ledChannel = 0, resolution = 12;
 
 void setup() {
-	ledcSetup(ledChannel, freq, resolution);
-	ledcAttachPin(motorPin, ledChannel);
+  Serial.begin(115200);
 
-	Serial.begin(115200);
+  pinMode(speedPin, INPUT); 
 
-	ledcWrite(ledChannel, 4090);
-	delay(500);
+  ledcSetup(ledChannel, freq, resolution);
+  ledcAttachPin(motorPin, ledChannel);
+  ledcWrite(ledChannel, 4090);
+  delay(500);
+
+  attachInterrupt(speedPin, rising, RISING);
 }
 
 void loop() {
+  int dutyCycle = map(analogRead(throttlePin), 0, 4095, 0, 4095);
+  ledcWrite(ledChannel, dutyCycle);
 
-	int dutyCycle = map(analogRead(throttlePin), 0, 4095, 2050, 4095);
+  // Serial.print(dutyCycle);
+  // Serial.print("\t");
+}
 
-	ledcWrite(ledChannel, dutyCycle);
+void rising() {
+  attachInterrupt(speedPin, falling, RISING);
+  prev_time = micros();
+}
 
-	Serial.print("Throttle In: ");
-	Serial.println(dutyCycle);
+void falling() {
+  attachInterrupt(speedPin, rising, RISING);
+  pwm_value = (micros()-prev_time);
+  Serial.println(pwm_value);
 }
