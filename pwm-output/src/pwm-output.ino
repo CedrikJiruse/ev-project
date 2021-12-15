@@ -1,19 +1,21 @@
 #include <Arduino.h>
 
-int throttlePin = 4;
-int motorPin = 16;
-int speedPin = 15;
+int throttlePin = 32;
+int motorPin = 23;
+int speedPin = 12;
 
 volatile int pwm_value = 0;
 volatile int prev_time = 0;
 
 // setting PWM properties
-const int freq = 200000, ledChannel = 0, resolution = 12;
+const int freq = 20000, ledChannel = 0, resolution = 12;
 
 void setup() {
   Serial.begin(115200);
 
   pinMode(speedPin, INPUT); 
+  pinMode(throttlePin, INPUT); 
+  pinMode(motorPin, OUTPUT); 
 
   ledcSetup(ledChannel, freq, resolution);
   ledcAttachPin(motorPin, ledChannel);
@@ -27,8 +29,10 @@ void loop() {
   int dutyCycle = map(analogRead(throttlePin), 0, 4095, 0, 4095);
   ledcWrite(ledChannel, dutyCycle);
 
-  // Serial.print(dutyCycle);
-  // Serial.print("\t");
+  Serial.print(dutyCycle);
+  Serial.print("\t");
+  Serial.print(pwm_value);
+  Serial.print("\n");
 }
 
 void rising() {
@@ -39,5 +43,4 @@ void rising() {
 void falling() {
   attachInterrupt(speedPin, rising, RISING);
   pwm_value = (micros()-prev_time);
-  Serial.println(pwm_value);
 }
