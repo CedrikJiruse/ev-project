@@ -1,37 +1,66 @@
 #include <Arduino.h>
 
-int throttlePin = 32;
-int motorPin = 23;
-int speedPin = 12;
+#define throttlePin 14
+#define motorPin 23
+#define speedPin 12
+#define brakePin 33
+#define motorLowPin 35
+#define motorHighPin 34
 
-volatile int pwm_value = 0;
+int pwmChannel = 0;
+int pwmMin = 700, pwmMax = 2400;
+volatile int microSpeed = 0;
 volatile int prev_time = 0;
-
-// setting PWM properties
-const int freq = 20000, ledChannel = 0, resolution = 12;
 
 void setup() {
   Serial.begin(115200);
 
-  pinMode(speedPin, INPUT); 
-  pinMode(throttlePin, INPUT); 
-  pinMode(motorPin, OUTPUT); 
+  pinMode(speedPin, INPUT);
+  pinMode(throttlePin, INPUT);
+  pinMode(brakePin, INPUT);
+  pinMode(motorLowPin, INPUT);
+  pinMode(motorHighPin, INPUT);
 
-  ledcSetup(ledChannel, freq, resolution);
-  ledcAttachPin(motorPin, ledChannel);
-  ledcWrite(ledChannel, 4090);
-  delay(500);
+  pinMode(motorPin, OUTPUT);
+
+  ledcSetup(pwmChannel, 20000, 12);
+  ledcAttachPin(motorPin, pwmChannel);
 
   attachInterrupt(speedPin, rising, RISING);
 }
 
 void loop() {
-  int dutyCycle = map(analogRead(throttlePin), 0, 4095, 0, 4095);
-  ledcWrite(ledChannel, dutyCycle);
+  int dutyCycle;
+  int motorHigh = digitalRead(motorHighPin);
+  int motorLow = digitalRead(motorLowPin);
+  int brake = digitalRead(brakePin);
 
-  Serial.print(dutyCycle);
+  if (motorHigh == LOW && motorLow == HIGH && brake == HIGH) {
+    dutyCycle = pwmMax;
+  }
+  if (brake == HIGH && motorLow == HIGH && motorHigh == HIGH) {
+    dutyCycle = map(analogRead(throttlePin), 0, 4095, pwmMin, pwmMax);
+  }
+  if (motorLow == LOW || brake == LOW) {
+    dutyCycle = 0;
+  }
+
+  ledcWrite(pwmChannel, dutyCycle);
+
+  Serial.print("Motor Low: ");
+  Serial.print(motorLow);
   Serial.print("\t");
-  Serial.print(pwm_value);
+  Serial.print("Motor High: ");
+  Serial.print(motorHigh);
+  Serial.print("\t");
+  Serial.print("Brake: ");
+  Serial.print(brake);
+  Serial.print("\t");
+  Serial.print("Duty Cycle: ");
+  Serial.print(dutyCycle);
+  Serial.print("       ");
+  Serial.print("Speed: ");
+  Serial.print(microSpeed);
   Serial.print("\n");
 }
 
@@ -42,5 +71,5 @@ void rising() {
 
 void falling() {
   attachInterrupt(speedPin, rising, RISING);
-  pwm_value = (micros()-prev_time);
+  microSpeed = (micros() - prev_time);
 }
