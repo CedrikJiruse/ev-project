@@ -85,23 +85,23 @@ void loop() {
 
   Serial.print("M-Low: ");
   Serial.print(motorLow);
-  Serial.print("   M-High: ");
+  Serial.print("  M-High: ");
   Serial.print(motorHigh);
   Serial.print("   Brake: ");
   Serial.print(brake);
   Serial.print("  |  Steering: ");
   Serial.print(steering);
   Serial.print("\t");
-  Serial.print(" PWM: ");
+  Serial.print("   PWM: ");
   Serial.print(motorPWM);
   Serial.print("\t");
-  Serial.print(" L-PWM: ");
+  Serial.print("   L-PWM: ");
   Serial.print(leftPWM);
   Serial.print("\t");
-  Serial.print(" R-PWM: ");
+  Serial.print("   R-PWM: ");
   Serial.print(rightPWM);
   Serial.print("\t");
-  Serial.print(" Speed: ");
+  Serial.print("   Speed: ");
   Serial.print(microSpeed);
   Serial.print("\n");
 }
