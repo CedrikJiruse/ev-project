@@ -3,8 +3,8 @@
 // esp32 pins
 #define throttlePin 26
 #define steeringPin 13
-#define leftMotorPin 23
-#define rightMotorPin 22
+#define leftMotorPin 22
+#define rightMotorPin 23
 #define speedPin 12
 #define brakePin 33
 #define motorLowPin 35
@@ -85,11 +85,11 @@ void loop() {
 
   Serial.print("M-Low: ");
   Serial.print(motorLow);
-  Serial.print(" M-High: ");
+  Serial.print("   M-High: ");
   Serial.print(motorHigh);
-  Serial.print(" Brake: ");
+  Serial.print("   Brake: ");
   Serial.print(brake);
-  Serial.print(" Steering: ");
+  Serial.print("  |  Steering: ");
   Serial.print(steering);
   Serial.print("\t");
   Serial.print(" PWM: ");
