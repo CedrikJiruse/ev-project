@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+// esp32 pins
 #define throttlePin 26
 #define steeringPin 13
 #define leftMotorPin 23
@@ -9,11 +10,15 @@
 #define motorLowPin 35
 #define motorHighPin 34
 
-//Left & right diff
+// motor range
+int pwmMin = 50, pwmMax = 4095;
 
+// pwm settings
+int pwmFreq = 500;
+int pwmBitRes = 12;
 int leftMotorChannel = 1;
 int rightMotorChannel = 2;
-int pwmMin = 50, pwmMax = 4095;
+
 volatile int microSpeed = 0;
 volatile int prev_time = 0;
 
@@ -30,23 +35,23 @@ void setup() {
   pinMode(leftMotorPin, OUTPUT);
   pinMode(rightMotorPin, OUTPUT);
 
-  ledcSetup(leftMotorChannel, 500, 12);
+  // setup pwm
+  // analogWrite does not exist for the ESP32, ledcX is the replacement
+  ledcSetup(leftMotorChannel, pwmFreq, pwmBitRes);
   ledcAttachPin(leftMotorPin, leftMotorChannel);
-  ledcSetup(rightMotorChannel, 500, 12);
+  ledcSetup(rightMotorChannel, pwmFreq, pwmBitRes);
   ledcAttachPin(rightMotorPin, rightMotorChannel);
 
   attachInterrupt(speedPin, rising, RISING);
 }
 
 void loop() {
-  // Motor
   int motorPWM;
   int motorHigh = digitalRead(motorHighPin);
   int motorLow = digitalRead(motorLowPin);
   int brake = digitalRead(brakePin);
 
   // set the duty cycle based on throttle position and sensors
-  
   if (motorHigh == HIGH && motorLow == LOW && brake == LOW) {
     motorPWM = pwmMax;
   }
@@ -54,15 +59,10 @@ void loop() {
     motorPWM = analogRead(throttlePin);
   }
 
-  // // Steering
+  // differential
   int steering = analogRead(steeringPin);
   int leftPWM;
   int rightPWM;
-
-  // Differential
-  // calculate PWM
-
-  // other motor going HIGH
 
   if (steering < 2047) { // going left, rightPWM HIGH
     rightPWM = motorPWM;
@@ -73,12 +73,13 @@ void loop() {
     rightPWM = map(steering, 2048, 4095, motorPWM, pwmMin);
   }
 
-  if (motorLow == HIGH || brake == HIGH) { // change BRAKE from high to low when connecting to car
-    leftPWM = 0;                          // this is done so that we dont have to press the brake every time we want to test duty cycle
+  // no power to both motors if brake/m.low is pressed
+  if (motorLow == HIGH || brake == HIGH) {
+    leftPWM = 0;
     rightPWM = 0;
   }
 
-  // set pwm to motors
+  // write pwm values to both motors
   ledcWrite(leftMotorChannel, leftPWM);
   ledcWrite(rightMotorChannel, rightPWM);
 
@@ -91,16 +92,16 @@ void loop() {
   Serial.print(" Steering: ");
   Serial.print(steering);
   Serial.print("\t");
-  Serial.print("PWM: ");
+  Serial.print(" PWM: ");
   Serial.print(motorPWM);
   Serial.print("\t");
-  Serial.print("L-PWM: ");
+  Serial.print(" L-PWM: ");
   Serial.print(leftPWM);
   Serial.print("\t");
-  Serial.print("R-PWM: ");
+  Serial.print(" R-PWM: ");
   Serial.print(rightPWM);
   Serial.print("\t");
-  Serial.print("Speed: ");
+  Serial.print(" Speed: ");
   Serial.print(microSpeed);
   Serial.print("\n");
 }
