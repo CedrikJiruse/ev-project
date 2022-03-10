@@ -11,10 +11,10 @@
 #define motorHighPin 34
 
 // motor range
-int pwmMin = 50, pwmMax = 4095;
+int pwmMin = 0, pwmMax = 4095;
 
 // pwm settings
-int pwmFreq = 500;
+int pwmFreq = 3000;
 int pwmBitRes = 12;
 int leftMotorChannel = 1;
 int rightMotorChannel = 2;
@@ -36,7 +36,7 @@ void setup() {
   pinMode(rightMotorPin, OUTPUT);
 
   // setup pwm
-  // analogWrite does not exist for the ESP32, ledcX is the replacement
+  // analogWrite does not exist for the ESP32, ledcx is the replacement
   ledcSetup(leftMotorChannel, pwmFreq, pwmBitRes);
   ledcAttachPin(leftMotorPin, leftMotorChannel);
   ledcSetup(rightMotorChannel, pwmFreq, pwmBitRes);
@@ -56,7 +56,7 @@ void loop() {
     motorPWM = pwmMax;
   }
   if (brake == LOW && motorLow == LOW && motorHigh == LOW) {
-    motorPWM = analogRead(throttlePin);
+    motorPWM = map(analogRead(throttlePin), 0, 4095, pwmMin, pwmMax);
   }
 
   // differential
@@ -74,7 +74,7 @@ void loop() {
   }
 
   // no power to both motors if brake/m.low is pressed
-  if (motorLow == HIGH || brake == HIGH) {
+  if (motorLow == HIGH || brake == HIGH || motorPWM <= pwmMin) {
     leftPWM = 0;
     rightPWM = 0;
   }
