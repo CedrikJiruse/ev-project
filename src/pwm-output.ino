@@ -14,7 +14,7 @@
 int pwmMin = 0, pwmMax = 4095;
 
 // pwm settings
-int pwmFreq = 3000;
+int pwmFreq = 10000;
 int pwmBitRes = 12;
 int leftMotorChannel = 1;
 int rightMotorChannel = 2;
