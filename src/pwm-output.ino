@@ -36,7 +36,7 @@ void setup() {
   pinMode(rightMotorPin, OUTPUT);
 
   // setup pwm
-  // analogWrite does not exist for the ESP32, ledcx is the replacement
+  // analogWrite does not exist for the ESP32, ledcX is the replacement
   ledcSetup(leftMotorChannel, pwmFreq, pwmBitRes);
   ledcAttachPin(leftMotorPin, leftMotorChannel);
   ledcSetup(rightMotorChannel, pwmFreq, pwmBitRes);
